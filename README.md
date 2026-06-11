@@ -52,6 +52,22 @@ Expected columns:
 └── README.md
 ```
 
+## Data Quality Checks
+
+Use `src/data_profile.py` to profile and validate the raw technology stock dataset before downstream analysis. The script loads `data/raw/tech_stocks.csv` with pandas, parses `Date` as a datetime field, and prints a compact data quality report covering:
+
+- Dataset shape, column names, and pandas dtypes.
+- Missing value counts and full duplicate row counts.
+- Duplicate `Symbol`/`Date` pair checks to confirm one observation per symbol per trading date.
+- Number of unique symbols, date coverage by symbol, and row counts by symbol.
+- Validation that `Open`, `High`, `Low`, `Close`, and `Volume` are non-null numeric columns.
+
+The script also writes a symbol-level summary table to `data/processed/data_profile_summary.csv`. Run it from the repository root after placing the raw CSV file in `data/raw/`:
+
+```bash
+python src/data_profile.py
+```
+
 ## Planned Methods
 
 ### Data Preparation
