@@ -1,0 +1,8 @@
+__pycache__/
+.ipynb_checkpoints/
+.env
+data/processed/*.csv
+reports/figures/*.png
+models/*.joblib
+*.db
+*.sqlite
