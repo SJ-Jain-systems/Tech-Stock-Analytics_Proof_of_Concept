@@ -146,14 +146,28 @@ Python notebooks and reusable modules in `src/` will support:
 
 ### Predictive Modeling
 
-The modeling workflow will explore next-day movement prediction as a learning-oriented classification task. Potential features include lagged returns, rolling volatility, rolling volume, price range measures, and symbol-level categorical features.
+Use `src/modeling.py` after feature engineering to run a reproducible next-day direction modeling experiment on `data/processed/stock_features.csv`:
 
-Potential model outputs include:
+```bash
+python src/modeling.py
+```
 
-- Baseline classification metrics.
-- Confusion matrices and ROC-AUC scores where appropriate.
-- Feature importance or coefficient summaries.
-- Saved model artifacts under `models/`.
+The modeling goal is to predict `target_next_day_up`, where `1` means the next-day return was positive and `0` means it was not. This is an educational classification experiment for comparing baseline machine learning methods on engineered historical features; it is not investment advice, a trading recommendation, or evidence of future profitability.
+
+The workflow uses a chronological split instead of a random split: the earliest 80% of dates are used for training and the latest 20% of dates are held out for testing. Rows with missing values in the selected feature columns or target are dropped before splitting.
+
+Models trained by the workflow include:
+
+- `DummyClassifier(strategy="most_frequent")` as a simple majority-class baseline.
+- `LogisticRegression` inside a `StandardScaler` pipeline.
+- `RandomForestClassifier`.
+- `GradientBoostingClassifier`.
+
+The script evaluates accuracy, precision, recall, F1, and ROC-AUC, prints the model comparison table, and writes outputs to:
+
+- `data/processed/model_comparison.csv` for model-level test metrics.
+- `data/processed/feature_importance.csv` for random forest and gradient boosting feature importances.
+- `models/*.joblib` for the trained model artifacts.
 
 Models should be evaluated carefully and should not be presented as investment advice or guaranteed trading signals.
 
