@@ -80,13 +80,20 @@ python src/data_profile.py
 
 ### SQL Analysis
 
-SQL scripts in `sql/` will be used to answer structured finance questions such as:
+SQL scripts in `sql/` provide SQLite-compatible table setup, validation, and repeatable analysis queries:
 
-- Trading date coverage by symbol.
-- Average and total volume by symbol and period.
-- Best and worst daily price moves.
-- Yearly performance summaries.
-- Rolling price and volume calculations where supported by the SQL engine.
+- `sql/01_create_tables.sql` rebuilds the `tech_stocks` table used by the SQLite loader.
+- `sql/02_data_quality_checks.sql` validates the loaded table with total row counts, unique symbol counts, symbol-level date coverage, duplicate `symbol`/`date` checks, missing close price checks, and trading day counts by symbol.
+- `sql/03_price_volume_summary.sql` summarizes average close prices, average volume, highest-volume trading days, highest-volume day per symbol with window functions, average daily price ranges, and average daily range percentages.
+- `sql/04_return_analysis.sql` calculates daily returns with `LAG(close)`, average daily returns, best and worst single-day returns, monthly returns, and yearly returns using CTEs and window functions.
+
+Run these scripts against the SQLite database created by `src/load_to_sqlite.py`, for example:
+
+```bash
+sqlite3 data/processed/tech_stocks.db < sql/02_data_quality_checks.sql
+sqlite3 data/processed/tech_stocks.db < sql/03_price_volume_summary.sql
+sqlite3 data/processed/tech_stocks.db < sql/04_return_analysis.sql
+```
 
 ### Python Analytics
 
