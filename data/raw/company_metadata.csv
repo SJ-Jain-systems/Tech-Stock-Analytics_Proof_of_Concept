@@ -1,0 +1,8 @@
+symbol,company_name,sector,industry,exchange,founded_year,headquarters
+AAPL,Apple Inc.,Technology,Consumer Electronics,NASDAQ,1976,"Cupertino, California, United States"
+AMZN,Amazon.com Inc.,Consumer Discretionary,Internet Retail,NASDAQ,1994,"Seattle, Washington, United States"
+FB,Meta Platforms Inc.,Communication Services,Social Media,NASDAQ,2004,"Menlo Park, California, United States"
+GOOG,Alphabet Inc.,Communication Services,Internet Services,NASDAQ,1998,"Mountain View, California, United States"
+MSFT,Microsoft Corporation,Technology,Software,NASDAQ,1975,"Redmond, Washington, United States"
+NFLX,Netflix Inc.,Communication Services,Streaming Entertainment,NASDAQ,1997,"Los Gatos, California, United States"
+NVDA,NVIDIA Corporation,Technology,Semiconductors,NASDAQ,1993,"Santa Clara, California, United States"
