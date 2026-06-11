@@ -142,6 +142,16 @@ Clean the raw stock dataset and write `data/processed/tech_stocks_clean.csv` wit
 python src/data_cleaning.py
 ```
 
+## SQL Database Setup
+
+After creating `data/processed/tech_stocks_clean.csv`, build the local SQLite database and load the cleaned stock records with:
+
+```bash
+python src/load_to_sqlite.py
+```
+
+The loader creates `data/processed/tech_stocks.db`, rebuilds the `tech_stocks` table from `sql/01_create_tables.sql`, loads the cleaned CSV data, and prints the loaded row count, unique symbol count, and database date range.
+
 ## Project Status
 
 Initial project structure and documentation have been created. The next step is to add the raw dataset and begin building the SQL and Python analysis workflow.
