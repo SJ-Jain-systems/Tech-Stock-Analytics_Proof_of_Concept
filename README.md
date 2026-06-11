@@ -1,190 +1,245 @@
-# Tech Stock Risk & Return Analytics
+# Tech Stock Price & Volume Analytics
 
-A Python + SQL finance data science project for analyzing historical daily stock data for technology companies. The project starts from the raw dataset at `data/raw/tech_stocks.csv` and is designed to support reproducible data cleaning, SQL analysis, exploratory analytics, visualization, feature engineering, and baseline predictive modeling.
+## 1. Project Overview
 
-This repository is intentionally initialized without fake outputs or fabricated findings. Reports, figures, processed datasets, and trained models should be generated only after running the analysis workflow on the source data.
+Tech Stock Price & Volume Analytics is an end-to-end data analytics and data science portfolio project for analyzing historical daily price and volume behavior across major technology and technology-adjacent public companies. The project combines reproducible Python pipelines, SQLite-based analytical querying, financial risk/return metrics, portfolio comparison, and baseline predictive modeling.
 
-## Project Goals
+The workflow is designed to move from raw market data to analysis-ready outputs in a transparent sequence:
 
-The project focuses on practical risk and return analytics for historical stock market data, including:
+1. Clean raw OHLCV stock data.
+2. Load the cleaned dataset and company reference data into SQLite.
+3. Engineer return, volatility, moving-average, volume, and next-day target features.
+4. Compute stock-level financial performance metrics.
+5. Compare individual stocks against an equal-weight portfolio.
+6. Train baseline classifiers to test whether engineered price/volume features contain predictive signal for next-day direction.
 
-- Measuring stock performance through daily returns, cumulative returns, and annualized return metrics.
-- Studying volatility with daily return distributions, rolling volatility, and symbol-level risk comparisons.
-- Evaluating drawdowns to understand peak-to-trough losses and downside risk.
-- Comparing symbols in a portfolio-style workflow using correlations, risk-return tradeoffs, and allocation experiments.
-- Engineering features from prices and volume for next-day movement prediction.
-- Combining SQL for structured analysis with Python for data science, visualization, and modeling.
+This repository intentionally separates reproducible code from generated artifacts. Processed CSV files, SQLite databases, figures, and model artifacts are generated locally by running the pipeline rather than being treated as hard-coded findings.
 
-## Dataset
+## 2. Business / Research Questions
 
-The raw input file should be placed at:
+The project is structured around practical questions that an analyst, data scientist, or investment research team might ask when studying historical technology stock behavior:
+
+- How clean and complete is the raw daily stock dataset by symbol and date?
+- What are the long-term price and volume patterns across the covered companies?
+- Which symbols show higher or lower historical volatility?
+- How do daily, monthly, and yearly returns vary by company?
+- Which companies experienced the largest downside risk as measured by maximum drawdown and historical value at risk?
+- Do simple risk-adjusted metrics such as Sharpe and Sortino ratios meaningfully differentiate stocks?
+- Does an equal-weight portfolio provide a smoother risk/return profile than holding individual stocks?
+- Do lagged returns, moving averages, volatility, intraday price behavior, and volume features contain measurable signal for next-day price direction?
+- How can SQL and Python be combined into a clean, auditable analytics workflow?
+
+The predictive modeling section is framed as a signal-detection exercise, not as a promise of profitable trading performance.
+
+## 3. Dataset
+
+### Raw Stock Data
+
+The main raw input file expected by the pipeline is:
 
 ```text
 data/raw/tech_stocks.csv
 ```
 
-Expected columns:
+The cleaning script expects the raw stock file to contain these columns:
 
 | Column | Description |
 | --- | --- |
-| `Date` | Trading date |
-| `Open` | Opening price |
-| `High` | Highest intraday price |
-| `Low` | Lowest intraday price |
-| `Close` | Closing price |
-| `Volume` | Shares traded |
-| `Symbol` | Stock ticker symbol |
+| `Date` | Trading date. |
+| `Open` | Opening price for the trading day. |
+| `High` | Highest traded price during the day. |
+| `Low` | Lowest traded price during the day. |
+| `Close` | Closing price for the trading day. |
+| `Volume` | Number of shares traded. |
+| `Symbol` | Stock ticker symbol. |
 
-## Repository Structure
+During cleaning, column names are standardized to lowercase, dates are parsed, core price/volume fields are coerced to numeric values, missing required fields are removed, duplicate symbol-date observations are dropped, and trading year/month fields are added.
+
+### Company Metadata
+
+The repository also includes a small reference table at:
+
+```text
+data/raw/company_metadata.csv
+```
+
+This file maps covered ticker symbols to company-level context, including company name, sector, industry, exchange, founding year, and headquarters. It is loaded into SQLite when available and supports joined SQL analysis.
+
+### Generated Data
+
+Pipeline outputs are written under `data/processed/`. These generated files are intentionally ignored by Git, so final numerical results should be reproduced by running the project locally on the raw dataset instead of being copied from the README.
+
+## 4. Methods
+
+The project uses a layered analytics workflow:
+
+- **Data cleaning:** Standardize schema, validate required columns, parse dates, remove unusable rows, remove duplicate symbol-date records, and create calendar helper fields.
+- **Relational analysis:** Load cleaned stock data and company metadata into SQLite for repeatable SQL checks, aggregations, joins, and window-function return analysis.
+- **Feature engineering:** Create lagged return, rolling return, moving-average, volatility, volume, intraday, and next-day target features by symbol.
+- **Exploratory analysis:** Use notebooks to inspect data quality, price behavior, return distributions, risk/return patterns, portfolio behavior, and modeling outputs.
+- **Financial metrics:** Summarize cumulative return, annualized return, annualized volatility, Sharpe ratio, Sortino ratio, maximum drawdown, and 95% historical value at risk.
+- **Portfolio analysis:** Build a simple equal-weight portfolio from available return series and compare its metrics against the individual symbols.
+- **Predictive modeling:** Train baseline classification models with a chronological train/test split to evaluate whether historical price/volume features contain next-day directional signal.
+
+## 5. Repository Structure
 
 ```text
 .
 ├── data/
-│   ├── raw/          # Original source data, including tech_stocks.csv
-│   └── processed/    # Cleaned and feature-engineered datasets
-├── sql/              # SQL scripts for validation, aggregation, and analysis
-├── notebooks/        # Jupyter notebooks for EDA, modeling, and reporting
-├── src/              # Reusable Python package code
+│   ├── raw/
+│   │   ├── company_metadata.csv
+│   │   └── tech_stocks.csv              # Expected local raw stock input
+│   └── processed/                       # Generated CSV and SQLite outputs
+├── models/                              # Generated model artifacts
+├── notebooks/
+│   ├── 01_data_cleaning.ipynb
+│   ├── 02_exploratory_analysis.ipynb
+│   ├── 03_risk_return_analysis.ipynb
+│   ├── 04_portfolio_analysis.ipynb
+│   └── 05_predictive_modeling.ipynb
 ├── reports/
-│   └── figures/      # Generated charts and visual outputs
-├── models/           # Trained model artifacts
-├── requirements.txt  # Python dependencies
+│   └── figures/                         # Generated visualizations
+├── sql/
+│   ├── 01_create_tables.sql
+│   ├── 02_data_quality_checks.sql
+│   ├── 03_price_volume_summary.sql
+│   ├── 04_return_analysis.sql
+│   └── 05_company_metadata_joins.sql
+├── src/
+│   ├── data_cleaning.py
+│   ├── data_profile.py
+│   ├── feature_engineering.py
+│   ├── financial_metrics.py
+│   ├── load_to_sqlite.py
+│   ├── modeling.py
+│   ├── portfolio.py
+│   ├── run_financial_metrics.py
+│   └── run_portfolio_analysis.py
+├── requirements.txt
 └── README.md
 ```
 
-## Data Quality Checks
+## 6. SQL Analysis
 
-Use `src/data_profile.py` to profile and validate the raw technology stock dataset before downstream analysis. The script loads `data/raw/tech_stocks.csv` with pandas, parses `Date` as a datetime field, and prints a compact data quality report covering:
+SQLite is used as the relational layer for structured analysis. The script `src/load_to_sqlite.py` reads the cleaned stock data from `data/processed/tech_stocks_clean.csv`, creates the SQLite database at `data/processed/tech_stocks.db`, loads the main `tech_stocks` table, and loads `company_metadata` when the metadata CSV is present.
 
-- Dataset shape, column names, and pandas dtypes.
-- Missing value counts and full duplicate row counts.
-- Duplicate `Symbol`/`Date` pair checks to confirm one observation per symbol per trading date.
-- Number of unique symbols, date coverage by symbol, and row counts by symbol.
-- Validation that `Open`, `High`, `Low`, `Close`, and `Volume` are non-null numeric columns.
+The SQL directory contains focused scripts:
 
-The script also writes a symbol-level summary table to `data/processed/data_profile_summary.csv`. Run it from the repository root after placing the raw CSV file in `data/raw/`:
+| SQL File | Purpose |
+| --- | --- |
+| `sql/01_create_tables.sql` | Defines the `tech_stocks` and `company_metadata` tables. |
+| `sql/02_data_quality_checks.sql` | Checks row counts, symbol counts, date ranges, duplicate symbol-date rows, missing close prices, and trading-day counts. |
+| `sql/03_price_volume_summary.sql` | Summarizes average close price, average volume, high-volume days, highest-volume day per symbol, and daily price ranges. |
+| `sql/04_return_analysis.sql` | Uses window functions to calculate daily returns, average daily returns, best/worst single-day returns, monthly returns, and yearly returns. |
+| `sql/05_company_metadata_joins.sql` | Joins stock records with company metadata for company, sector, industry, exchange, and headquarters context. |
 
-```bash
-python src/data_profile.py
+These scripts are written to support reproducible investigation rather than one-off manual analysis.
+
+## 7. Feature Engineering
+
+`src/feature_engineering.py` converts the cleaned dataset into a modeling-ready feature table at:
+
+```text
+data/processed/stock_features.csv
 ```
 
+Feature creation is performed independently within each symbol after sorting by symbol and date. This prevents leakage across companies when calculating lagged and rolling fields.
 
-## Feature Engineering
+Engineered features include:
 
-Use `src/feature_engineering.py` after cleaning the raw dataset to create model-ready stock features from `data/processed/tech_stocks_clean.csv` and write them to `data/processed/stock_features.csv`:
+- **Return features:** `daily_return`, `log_return`, `return_5d`, `return_10d`, `return_20d`.
+- **Lag features:** `lag_1_return`, `lag_2_return`, `lag_3_return`, `lag_5_return`.
+- **Moving averages:** `ma_5`, `ma_20`, `ma_50`, `close_to_ma20_ratio`.
+- **Volatility features:** `rolling_volatility_10`, `rolling_volatility_20`, `rolling_volatility_50`.
+- **Volume features:** `volume_change`, `volume_ma_20`, `volume_to_ma20_ratio`.
+- **Intraday price behavior:** `price_range`, `price_range_pct`, `intraday_return`.
+- **Prediction target:** `next_day_return` and binary `target_next_day_up`.
 
-```bash
-python src/feature_engineering.py
+Rows that cannot support required modeling fields because of lag, rolling-window, or next-day target calculations are dropped from the final feature output.
+
+## 8. Exploratory Data Analysis
+
+Exploratory analysis is supported through the notebooks in `notebooks/` and through generated pipeline outputs. The EDA workflow is intended to examine:
+
+- Dataset shape, schema, and data quality issues.
+- Date coverage and row counts by stock symbol.
+- Price trends and volume trends over time.
+- Daily return distributions and outlier behavior.
+- Rolling volatility patterns.
+- Cumulative return paths by symbol.
+- Correlations across stock return series.
+- Drawdown patterns and downside risk.
+- Differences between individual-stock behavior and portfolio-level behavior.
+
+The README does not list final EDA conclusions because generated processed outputs are not currently committed to the repository. Analysts should run the pipeline and notebooks to produce reproducible results from the raw data.
+
+## 9. Financial Metrics
+
+`src/run_financial_metrics.py` reads `data/processed/stock_features.csv` and writes a stock-level summary to:
+
+```text
+data/processed/stock_metric_summary.csv
 ```
 
-The feature engineering workflow sorts observations by `symbol` and `date`, applies all rolling, lagged, and target calculations within `groupby("symbol")`, and drops only rows missing required modeling columns caused by lag, rolling-window, or next-day target calculations. Created features include:
+The metrics are calculated from daily returns and include:
 
-- Return features: `daily_return`, `log_return`, `return_5d`, `return_10d`, and `return_20d`.
-- Lag features: `lag_1_return`, `lag_2_return`, `lag_3_return`, and `lag_5_return`.
-- Moving averages: `ma_5`, `ma_20`, `ma_50`, and `close_to_ma20_ratio`.
-- Volatility features: `rolling_volatility_10`, `rolling_volatility_20`, and `rolling_volatility_50`.
-- Volume features: `volume_change`, `volume_ma_20`, and `volume_to_ma20_ratio`.
-- Price behavior features: `price_range`, `price_range_pct`, and `intraday_return`.
-- Target columns: `next_day_return` and `target_next_day_up`, where `target_next_day_up` equals `1` when the next-day return is positive and `0` otherwise.
+| Metric | Interpretation |
+| --- | --- |
+| `cumulative_return` | Total compounded return over the available period. |
+| `annualized_return` | Return scaled to a 252-trading-day year. |
+| `annualized_volatility` | Standard deviation of daily returns scaled to a 252-trading-day year. |
+| `sharpe_ratio` | Excess annualized return divided by annualized volatility, using a default risk-free rate of 0. |
+| `sortino_ratio` | Excess annualized return divided by annualized downside deviation. |
+| `max_drawdown` | Largest peak-to-trough cumulative decline. |
+| `var_95` | 95% historical value at risk based on the lower tail of daily returns. |
 
+These metrics support risk/return comparison but should not be interpreted as forecasts of future performance.
 
-## Portfolio Analysis
+## 10. Portfolio Analysis
 
-Use `src/run_portfolio_analysis.py` after feature engineering to test a simple equal-weight portfolio built from the available stock return series in `data/processed/stock_features.csv`:
+`src/run_portfolio_analysis.py` evaluates a simple equal-weight portfolio using the engineered daily return series. The portfolio return for each date is calculated as the average return across symbols with valid data on that date.
 
-```bash
-python src/run_portfolio_analysis.py
+The workflow writes two files:
+
+```text
+data/processed/equal_weight_portfolio_returns.csv
+data/processed/portfolio_comparison.csv
 ```
 
-The workflow pivots the engineered `daily_return` values into a date-indexed return matrix with one column per symbol, then calculates the portfolio daily return as the average return across all symbols with valid data on each trading date. This means each available stock contributes the same weight for that date instead of weighting larger companies more heavily.
+The first file contains the portfolio daily return and compounded cumulative return by date. The second file compares the equal-weight portfolio against individual stock metrics using the same financial metric framework.
 
-The analysis saves two portfolio outputs under `data/processed/`:
+The purpose of this section is to evaluate diversification effects in a transparent way: if individual stocks do not move perfectly together, a basket can potentially reduce company-specific volatility and drawdown risk. The project does not assume the equal-weight portfolio is optimal; it is a clear baseline for comparison.
 
-- `equal_weight_portfolio_returns.csv` with the portfolio daily return and compounded cumulative return by date.
-- `portfolio_comparison.csv` with the equal-weight portfolio metrics stacked against individual stock metrics, including cumulative return, annualized return, annualized volatility, Sharpe ratio, Sortino ratio, maximum drawdown, and 95% historical value at risk.
+## 11. Predictive Modeling
 
-Diversification is being tested because a basket of stocks can reduce company-specific risk when individual stock returns do not move perfectly together. Comparing the equal-weight portfolio against each stock shows whether spreading capital evenly across the symbols improves the risk-return profile, reduces volatility, limits drawdowns, or provides a smoother return path than holding a single technology stock.
+`src/modeling.py` trains baseline classifiers to test whether engineered historical price and volume features contain measurable signal for next-day directional movement.
 
-## Planned Methods
+The modeling target is:
 
-### Data Preparation
-
-- Validate required columns and data types.
-- Parse `Date` as a date field.
-- Check for missing values, duplicate `Symbol`/`Date` rows, and invalid price or volume values.
-- Sort observations by `Symbol` and `Date`.
-- Save cleaned analysis-ready files under `data/processed/`.
-
-### SQL Analysis
-
-SQL scripts in `sql/` provide SQLite-compatible table setup, validation, and repeatable analysis queries:
-
-- `sql/01_create_tables.sql` rebuilds the `tech_stocks` table used by the SQLite loader.
-- `sql/02_data_quality_checks.sql` validates the loaded table with total row counts, unique symbol counts, symbol-level date coverage, duplicate `symbol`/`date` checks, missing close price checks, and trading day counts by symbol.
-- `sql/03_price_volume_summary.sql` summarizes average close prices, average volume, highest-volume trading days, highest-volume day per symbol with window functions, average daily price ranges, and average daily range percentages.
-- `sql/04_return_analysis.sql` calculates daily returns with `LAG(close)`, average daily returns, best and worst single-day returns, monthly returns, and yearly returns using CTEs and window functions.
-
-Run these scripts against the SQLite database created by `src/load_to_sqlite.py`, for example:
-
-```bash
-sqlite3 data/processed/tech_stocks.db < sql/02_data_quality_checks.sql
-sqlite3 data/processed/tech_stocks.db < sql/03_price_volume_summary.sql
-sqlite3 data/processed/tech_stocks.db < sql/04_return_analysis.sql
+```text
+target_next_day_up
 ```
 
-### Python Analytics
+This target equals `1` when the next-day return is positive and `0` otherwise.
 
-Python notebooks and reusable modules in `src/` will support:
+The modeling workflow uses a chronological train/test split rather than a random split, which better reflects the time-ordered nature of financial data. It trains baseline models, evaluates out-of-sample classification performance, and writes:
 
-- Daily and log return calculations.
-- Cumulative return analysis.
-- Rolling volatility and moving average features.
-- Maximum drawdown calculations.
-- Correlation analysis across symbols.
-- Portfolio-level risk and return comparisons.
-- Visualizations of price, volume, volatility, drawdown, and risk-return relationships.
-
-### Predictive Modeling
-
-Use `src/modeling.py` after feature engineering to run a reproducible next-day direction modeling experiment on `data/processed/stock_features.csv`:
-
-```bash
-python src/modeling.py
+```text
+data/processed/model_comparison.csv
+data/processed/feature_importance.csv
+models/logistic_regression.joblib
+models/random_forest.joblib
 ```
 
-The modeling goal is to predict `target_next_day_up`, where `1` means the next-day return was positive and `0` means it was not. This is an educational classification experiment for comparing baseline machine learning methods on engineered historical features; it is not investment advice, a trading recommendation, or evidence of future profitability.
+Model evaluation metrics include accuracy, precision, recall, F1 score, ROC AUC when available, and the number of test observations.
 
-The workflow uses a chronological split instead of a random split: the earliest 80% of dates are used for training and the latest 20% of dates are held out for testing. Rows with missing values in the selected feature columns or target are dropped before splitting.
+The predictive model is designed to test whether price/volume features contain signal. It is not designed to guarantee profitable trading, and it does not include transaction costs, slippage, position sizing, execution constraints, taxes, or live-market validation.
 
-Models trained by the workflow include:
+## 12. How to Run
 
-- `DummyClassifier(strategy="most_frequent")` as a simple majority-class baseline.
-- `LogisticRegression` inside a `StandardScaler` pipeline.
-- `RandomForestClassifier`.
-- `GradientBoostingClassifier`.
+### 1. Set Up the Environment
 
-The script evaluates accuracy, precision, recall, F1, and ROC-AUC, prints the model comparison table, and writes outputs to:
-
-- `data/processed/model_comparison.csv` for model-level test metrics.
-- `data/processed/feature_importance.csv` for random forest and gradient boosting feature importances.
-- `models/*.joblib` for the trained model artifacts.
-
-Models should be evaluated carefully and should not be presented as investment advice or guaranteed trading signals.
-
-## Expected Outputs
-
-Once the workflow is implemented and run, the project is expected to produce:
-
-- Cleaned datasets in `data/processed/`.
-- SQL query files documenting core analysis steps.
-- Exploratory notebooks with reproducible calculations.
-- Figures saved in `reports/figures/`.
-- Optional trained model artifacts in `models/`.
-- A written summary of stock performance, volatility, drawdown, portfolio behavior, and predictive modeling results.
-
-## Setup
-
-Create and activate a virtual environment, then install dependencies:
+From the repository root, create and activate a Python environment, then install dependencies:
 
 ```bash
 python -m venv .venv
@@ -192,28 +247,107 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-Place the raw dataset at `data/raw/tech_stocks.csv` before running analysis notebooks or scripts.
+On Windows PowerShell, activate the environment with:
 
-Clean the raw stock dataset and write `data/processed/tech_stocks_clean.csv` with:
+```powershell
+.venv\Scripts\Activate.ps1
+```
+
+### 2. Add the Raw Stock Dataset
+
+Place the raw stock CSV at:
+
+```text
+data/raw/tech_stocks.csv
+```
+
+The included `data/raw/company_metadata.csv` can remain in place for SQL metadata joins.
+
+### 3. Run the Pipeline
+
+Run the command-line workflow in this order:
 
 ```bash
 python src/data_cleaning.py
+python src/load_to_sqlite.py
+python src/feature_engineering.py
+python src/run_financial_metrics.py
+python src/run_portfolio_analysis.py
+python src/modeling.py
 ```
 
-## SQL Database Setup
+### 4. Optional Data Profiling
 
-After creating `data/processed/tech_stocks_clean.csv`, build the local SQLite database and load the cleaned stock records with:
+Before or after cleaning, you can run a standalone raw-data profiling script:
 
 ```bash
-python src/load_to_sqlite.py
+python src/data_profile.py
 ```
 
-The loader creates `data/processed/tech_stocks.db`, rebuilds the `tech_stocks` table from `sql/01_create_tables.sql`, loads the cleaned CSV data, and prints the loaded row count, unique symbol count, and database date range.
+This writes `data/processed/data_profile_summary.csv` and prints compact validation details.
 
-## Project Status
+### 5. Optional SQL Exploration
 
-Initial project structure and documentation have been created. The next step is to add the raw dataset and begin building the SQL and Python analysis workflow.
+After running `python src/load_to_sqlite.py`, open `data/processed/tech_stocks.db` with a SQLite client and run the scripts in the `sql/` directory.
 
-## Disclaimer
+Example:
 
-This project is for educational and portfolio purposes only. It uses historical market data and should not be interpreted as financial advice.
+```bash
+sqlite3 data/processed/tech_stocks.db < sql/02_data_quality_checks.sql
+sqlite3 data/processed/tech_stocks.db < sql/03_price_volume_summary.sql
+sqlite3 data/processed/tech_stocks.db < sql/04_return_analysis.sql
+sqlite3 data/processed/tech_stocks.db < sql/05_company_metadata_joins.sql
+```
+
+## 13. Expected Outputs
+
+After the full workflow completes, expected generated outputs include:
+
+| Output | Created By | Description |
+| --- | --- | --- |
+| `data/processed/tech_stocks_clean.csv` | `src/data_cleaning.py` | Cleaned, standardized stock dataset. |
+| `data/processed/tech_stocks.db` | `src/load_to_sqlite.py` | SQLite database with stock and metadata tables. |
+| `data/processed/stock_features.csv` | `src/feature_engineering.py` | Feature-engineered dataset for metrics and modeling. |
+| `data/processed/stock_metric_summary.csv` | `src/run_financial_metrics.py` | Stock-level risk/return metric summary. |
+| `data/processed/equal_weight_portfolio_returns.csv` | `src/run_portfolio_analysis.py` | Daily and cumulative returns for the equal-weight portfolio. |
+| `data/processed/portfolio_comparison.csv` | `src/run_portfolio_analysis.py` | Individual stock metrics compared with the equal-weight portfolio. |
+| `data/processed/model_comparison.csv` | `src/modeling.py` | Classification metric comparison for trained baseline models. |
+| `data/processed/feature_importance.csv` | `src/modeling.py` | Model-derived feature importance summary when available. |
+| `models/logistic_regression.joblib` | `src/modeling.py` | Saved logistic regression pipeline. |
+| `models/random_forest.joblib` | `src/modeling.py` | Saved random forest pipeline. |
+
+Because processed outputs are generated artifacts, numerical values should be taken from local pipeline outputs rather than from this README.
+
+## 14. Limitations
+
+Important limitations include:
+
+- The project depends on the availability and quality of the local raw stock CSV.
+- The pipeline uses historical daily OHLCV data only; it does not include fundamentals, earnings, analyst estimates, macroeconomic data, news, sentiment, options data, or intraday order-book information.
+- Financial metrics are backward-looking and may not represent future market behavior.
+- The default risk-free rate used in Sharpe and Sortino calculations is zero unless changed in code.
+- The equal-weight portfolio is a simple benchmark, not a portfolio optimization model.
+- The predictive model uses historical engineered features and does not account for transaction costs, slippage, liquidity limits, market impact, taxes, or execution timing.
+- Classification metrics do not automatically translate into profitable trading performance.
+- The model training workflow is a baseline approach and should not be treated as production-grade live trading infrastructure.
+
+## 15. Future Improvements
+
+Potential extensions include:
+
+- Add automated tests for cleaning, feature engineering, metric calculations, and modeling outputs.
+- Add richer visual reporting and export key figures to `reports/figures/`.
+- Add walk-forward validation or expanding-window backtesting for time-series model evaluation.
+- Include transaction costs, slippage assumptions, and position-sizing rules in strategy simulations.
+- Compare additional models such as gradient boosting, calibrated classifiers, and regularized linear models.
+- Add benchmark comparison against broad market ETFs or sector indexes.
+- Incorporate fundamentals, earnings dates, macro variables, sentiment, or news features.
+- Add portfolio optimization methods such as minimum variance, maximum Sharpe, and risk parity.
+- Add data validation with schema checks and pipeline tests in continuous integration.
+- Package the workflow as a command-line application or reproducible notebook report.
+
+## 16. Disclaimer
+
+This project is for educational, analytical, and portfolio demonstration purposes only. It is not investment advice, financial advice, trading advice, or a recommendation to buy, sell, or hold any security.
+
+Historical performance does not guarantee future results. The predictive modeling workflow is designed to test whether engineered price and volume features contain statistical signal for next-day direction; it is not designed to guarantee profitable trading or live investment performance. Anyone making financial decisions should consult qualified professionals and perform independent due diligence.
