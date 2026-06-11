@@ -7,3 +7,4 @@ duckdb
 jupyter
 notebook
 joblib
+pytest

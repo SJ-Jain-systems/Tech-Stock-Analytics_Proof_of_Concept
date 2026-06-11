@@ -265,7 +265,13 @@ The included `data/raw/company_metadata.csv` can remain in place for SQL metadat
 
 ### 3. Run the Pipeline
 
-Run the command-line workflow in this order:
+Run the full command-line workflow with the lightweight reproducibility script:
+
+```bash
+python src/run_all.py
+```
+
+The script runs the pipeline in this order and stops if any step fails:
 
 ```bash
 python src/data_cleaning.py
@@ -276,7 +282,15 @@ python src/run_portfolio_analysis.py
 python src/modeling.py
 ```
 
-### 4. Optional Data Profiling
+### 4. Run Tests
+
+Run the basic pytest suite with:
+
+```bash
+pytest
+```
+
+### 5. Optional Data Profiling
 
 Before or after cleaning, you can run a standalone raw-data profiling script:
 
@@ -286,7 +300,7 @@ python src/data_profile.py
 
 This writes `data/processed/data_profile_summary.csv` and prints compact validation details.
 
-### 5. Optional SQL Exploration
+### 6. Optional SQL Exploration
 
 After running `python src/load_to_sqlite.py`, open `data/processed/tech_stocks.db` with a SQLite client and run the scripts in the `sql/` directory.
 
@@ -313,8 +327,10 @@ After the full workflow completes, expected generated outputs include:
 | `data/processed/portfolio_comparison.csv` | `src/run_portfolio_analysis.py` | Individual stock metrics compared with the equal-weight portfolio. |
 | `data/processed/model_comparison.csv` | `src/modeling.py` | Classification metric comparison for trained baseline models. |
 | `data/processed/feature_importance.csv` | `src/modeling.py` | Model-derived feature importance summary when available. |
+| `models/dummy_most_frequent.joblib` | `src/modeling.py` | Saved most-frequent baseline classifier. |
 | `models/logistic_regression.joblib` | `src/modeling.py` | Saved logistic regression pipeline. |
-| `models/random_forest.joblib` | `src/modeling.py` | Saved random forest pipeline. |
+| `models/random_forest.joblib` | `src/modeling.py` | Saved random forest classifier. |
+| `models/gradient_boosting.joblib` | `src/modeling.py` | Saved gradient boosting classifier. |
 
 Because processed outputs are generated artifacts, numerical values should be taken from local pipeline outputs rather than from this README.
 
@@ -335,7 +351,7 @@ Important limitations include:
 
 Potential extensions include:
 
-- Add automated tests for cleaning, feature engineering, metric calculations, and modeling outputs.
+- Expand automated tests for cleaning, SQL loading, portfolio analysis, and modeling outputs.
 - Add richer visual reporting and export key figures to `reports/figures/`.
 - Add walk-forward validation or expanding-window backtesting for time-series model evaluation.
 - Include transaction costs, slippage assumptions, and position-sizing rules in strategy simulations.
