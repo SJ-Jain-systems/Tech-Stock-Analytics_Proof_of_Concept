@@ -136,6 +136,12 @@ pip install -r requirements.txt
 
 Place the raw dataset at `data/raw/tech_stocks.csv` before running analysis notebooks or scripts.
 
+Clean the raw stock dataset and write `data/processed/tech_stocks_clean.csv` with:
+
+```bash
+python src/data_cleaning.py
+```
+
 ## Project Status
 
 Initial project structure and documentation have been created. The next step is to add the raw dataset and begin building the SQL and Python analysis workflow.
