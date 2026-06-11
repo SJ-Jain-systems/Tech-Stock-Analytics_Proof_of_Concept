@@ -87,6 +87,24 @@ The feature engineering workflow sorts observations by `symbol` and `date`, appl
 - Price behavior features: `price_range`, `price_range_pct`, and `intraday_return`.
 - Target columns: `next_day_return` and `target_next_day_up`, where `target_next_day_up` equals `1` when the next-day return is positive and `0` otherwise.
 
+
+## Portfolio Analysis
+
+Use `src/run_portfolio_analysis.py` after feature engineering to test a simple equal-weight portfolio built from the available stock return series in `data/processed/stock_features.csv`:
+
+```bash
+python src/run_portfolio_analysis.py
+```
+
+The workflow pivots the engineered `daily_return` values into a date-indexed return matrix with one column per symbol, then calculates the portfolio daily return as the average return across all symbols with valid data on each trading date. This means each available stock contributes the same weight for that date instead of weighting larger companies more heavily.
+
+The analysis saves two portfolio outputs under `data/processed/`:
+
+- `equal_weight_portfolio_returns.csv` with the portfolio daily return and compounded cumulative return by date.
+- `portfolio_comparison.csv` with the equal-weight portfolio metrics stacked against individual stock metrics, including cumulative return, annualized return, annualized volatility, Sharpe ratio, Sortino ratio, maximum drawdown, and 95% historical value at risk.
+
+Diversification is being tested because a basket of stocks can reduce company-specific risk when individual stock returns do not move perfectly together. Comparing the equal-weight portfolio against each stock shows whether spreading capital evenly across the symbols improves the risk-return profile, reduces volatility, limits drawdowns, or provides a smoother return path than holding a single technology stock.
+
 ## Planned Methods
 
 ### Data Preparation
