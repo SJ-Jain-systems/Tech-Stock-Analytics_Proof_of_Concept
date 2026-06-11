@@ -68,6 +68,25 @@ The script also writes a symbol-level summary table to `data/processed/data_prof
 python src/data_profile.py
 ```
 
+
+## Feature Engineering
+
+Use `src/feature_engineering.py` after cleaning the raw dataset to create model-ready stock features from `data/processed/tech_stocks_clean.csv` and write them to `data/processed/stock_features.csv`:
+
+```bash
+python src/feature_engineering.py
+```
+
+The feature engineering workflow sorts observations by `symbol` and `date`, applies all rolling, lagged, and target calculations within `groupby("symbol")`, and drops only rows missing required modeling columns caused by lag, rolling-window, or next-day target calculations. Created features include:
+
+- Return features: `daily_return`, `log_return`, `return_5d`, `return_10d`, and `return_20d`.
+- Lag features: `lag_1_return`, `lag_2_return`, `lag_3_return`, and `lag_5_return`.
+- Moving averages: `ma_5`, `ma_20`, `ma_50`, and `close_to_ma20_ratio`.
+- Volatility features: `rolling_volatility_10`, `rolling_volatility_20`, and `rolling_volatility_50`.
+- Volume features: `volume_change`, `volume_ma_20`, and `volume_to_ma20_ratio`.
+- Price behavior features: `price_range`, `price_range_pct`, and `intraday_return`.
+- Target columns: `next_day_return` and `target_next_day_up`, where `target_next_day_up` equals `1` when the next-day return is positive and `0` otherwise.
+
 ## Planned Methods
 
 ### Data Preparation
